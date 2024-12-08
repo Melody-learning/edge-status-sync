@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 登录页面 -->
+        <div id="loginPage" class="page active">
+            <div class="page-title">登录</div>
+            <div class="input-container">
+                <div class="input-group">
+                    <div class="tooltip" id="loginTooltip"></div>
+                    <input type="text" id="loginText" class="input-field" placeholder="专属口令文字部分">
+                    <span class="separator">+</span>
+                    <input type="text" id="loginNumber" class="input-field" placeholder="数字部分">
+                </div>
+                <div class="error-message" id="loginError"></div>
+            </div>
+            <button id="loginButton" class="button">登录</button>
+            <button id="toRegister" class="link-button">前往创建</button>
+        </div>
+
+        <!-- 注册页面 -->
+        <div id="registerPage" class="page">
+            <div class="page-title">创建账号</div>
+            <div class="input-container">
+                <div>请创建一个文字+数字的专属口令吧，后续登录账号和绑定关系也用它哦</div>
+                <div>示例：杨兴豪你是个猪 + 2333</div>
+                <div class="input-group">
+                    <div class="tooltip" id="registerTooltip"></div>
+                    <input type="text" id="registerText" class="input-field" placeholder="8~16个字符">
+                    <span class="separator">+</span>
+                    <input type="text" id="registerNumber" class="input-field" placeholder="3~6位数字">
+                </div>
+                <div class="error-message" id="registerError"></div>
+            </div>
+            <button id="registerButton" class="button">创建</button>
+            <button id="toLogin" class="link-button">返回登录</button>
+        </div>
+
+        <!-- 绑定页面 -->
+        <div id="bindPage" class="page">
+            <div class="page-title">绑定对方</div>
+            <div class="debug-area">
+                <button id="logoutButton" class="debug-button">登出</button>
+                <button id="unbindButton" class="debug-button">解绑</button>
+            </div>
+            <div class="input-container">
+                <div>如果不知道的话问问他/她？</div>
+                <div class="input-group">
+                    <div class="tooltip" id="bindTooltip"></div>
+                    <input type="text" id="bindText" class="input-field" placeholder="对方专属口令文字部分">
+                    <span class="separator">+</span>
+                    <input type="text" id="bindNumber" class="input-field" placeholder="数字部分">
+                </div>
+                <div class="error-message" id="bindError"></div>
+            </div>
+            <button id="bindButton" class="button">确认绑定</button>
+        </div>
+
+        <!-- 绑定成功页面 -->
+        <div id="successPage" class="page">
+            <div class="page-title">绑定成功</div>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
