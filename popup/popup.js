@@ -88,9 +88,11 @@ if (!buttons.login || !buttons.register || !buttons.bind || !buttons.toRegister 
 // 显示气泡提示
 function showTooltip(tooltipElement, message) {
     tooltipElement.textContent = message;
-    tooltipElement.classList.add('show');
+    tooltipElement.classList.remove('hidden');
+    tooltipElement.classList.add('tooltip', 'tooltip-open', 'tooltip-error');
     setTimeout(() => {
-        tooltipElement.classList.remove('show');
+        tooltipElement.classList.add('hidden');
+        tooltipElement.classList.remove('tooltip', 'tooltip-open', 'tooltip-error');
     }, 1500);
 }
 
@@ -103,8 +105,7 @@ const validators = {
         lengthError: (value) => {
             if (!value) return '请输入文字部分';
             if (value.length < 8) return '文字长度不能少于8个字符';
-            if (value.length > 16) return '文字长度不能超过16个字符';
-            return null;
+            return null;  // 不需要检查最大长度，因为 maxlength 会限制
         }
     },
     number: {
@@ -114,15 +115,18 @@ const validators = {
         lengthError: (value) => {
             if (!value) return '请输入数字部分';
             if (value.length < 3) return '数字长度不能少于3位';
-            if (value.length > 6) return '数字长度不能超过6位';
-            return null;
+            return null;  // 不需要检查最大长度，因为 maxlength 会限制
         }
     }
 };
 
 // 页面切换
 function showPage(pageId) {
-    Object.values(pages).forEach(page => page.classList.remove('active'));
+    Object.values(pages).forEach(page => {
+        page.classList.add('hidden');
+        page.classList.remove('active');
+    });
+    pages[pageId].classList.remove('hidden');
     pages[pageId].classList.add('active');
 }
 
@@ -157,13 +161,7 @@ Object.values(inputs).forEach(input => {
     });
 
     input.text.addEventListener('input', (e) => {
-        // 检查长度并截断
-        if (e.target.value.length > validators.text.length.max) {
-            e.target.value = e.target.value.slice(0, validators.text.length.max);
-            showTooltip(input.tooltip, validators.text.lengthError(e.target.value));
-        } else {
-            input.error.textContent = '';
-        }
+        input.error.textContent = '';
     });
 
     // 数字输入框
@@ -175,13 +173,7 @@ Object.values(inputs).forEach(input => {
     });
 
     input.number.addEventListener('input', (e) => {
-        // 检查长度并截断
-        if (e.target.value.length > validators.number.length.max) {
-            e.target.value = e.target.value.slice(0, validators.number.length.max);
-            showTooltip(input.tooltip, validators.number.lengthError(e.target.value));
-        } else {
-            input.error.textContent = '';
-        }
+        input.error.textContent = '';
     });
 
     // 失去焦点时验证长度
