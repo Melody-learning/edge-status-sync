@@ -1,0 +1,17 @@
+{
+  "name": "edge-status-sync",
+  "version": "1.0.0",
+  "description": "A browser extension for couples to share their real-time status",
+  "scripts": {
+    "css": "tailwindcss -i ./src/input.css -o ./popup/popup.css --watch"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.17",
+    "daisyui": "^4.7.2",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1"
+  },
+  "dependencies": {
+    "psl": "^1.15.0"
+  }
+}
