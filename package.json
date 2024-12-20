@@ -12,6 +12,7 @@
     "tailwindcss": "^3.4.1"
   },
   "dependencies": {
+    "jsonwebtoken": "^9.0.2",
     "psl": "^1.15.0"
   }
 }

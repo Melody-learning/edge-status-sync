@@ -1,0 +1,133 @@
+# 项目理解
+
+## 1. 文件结构
+
+### 1.1 核心服务端文件 (最重要)
+```
+server/
+├── server.js                 # 主服务器入口文件
+├── src/
+│   ├── services/            # 核心业务逻辑
+│   │   ├── socketService.js # WebSocket通信服务
+│   │   ├── statusService.js # 状态管理服务
+│   │   └── userService.js   # 用户管理服务
+│   ├── routes/              # API路由
+│   │   ├── statusRoutes.js  # 状态相关接口
+│   │   └── userRoutes.js    # 用户相关接口
+│   └── middleware/          # 中间件
+│       ├── socket.js        # WebSocket中间件
+│       ├── auth.js          # 认证中间件
+│       └── error.js         # 错误处理中间件
+```
+
+### 1.2 核心客户端文件
+```
+popup/
+├── popup.html               # 主界面HTML
+├── popup.js                 # 主界面逻辑
+└── popup.css               # 样式文件
+
+services/
+├── socketService.js         # 客户端WebSocket服务
+├── activityService.js       # 活动监控服务
+└── userService.js          # 用户服务
+
+background/
+└── background.js           # 后台服务
+```
+
+### 1.3 配置文件
+```
+server/src/config/
+└── default.js              # 服务器配置
+
+manifest.json               # 扩展配置文件
+```
+
+## 2. 关键文件说明
+
+### 2.1 服务端核心文件
+- `server.js`: 服务器入口，包含Express和WebSocket的配置
+- `socketService.js`: 处理实时通信
+- `statusService.js`: 管理用户状态
+- `userService.js`: 处理用户认证和配对
+
+### 2.2 客户端核心文件
+- `popup.html`/`popup.js`: 扩展的主界面和交互逻辑
+- `activityService.js`: 监控用户活动
+- `background.js`: 扩展的后台服务
+
+### 2.3 配置文件
+- `manifest.json`: 扩展的配置文件，定义权限和功能
+- `default.js`: 服务器的配置参数
+
+## 3. 项目功能
+
+### 3.1 核心功能
+1. 用户配对系统
+   - 通过口令（text@number格式）进行配对
+   - 实时状态同步
+   - 配对状态管理
+
+2. 实时状态同步
+   - 在线/离线状态
+   - 活动状态
+   - 自定义状态标签
+
+3. 活动监控
+   - 标签页打开/关闭
+   - 书签添加
+   - 下载管理
+   - 浏览器活动追踪
+
+4. 界面功能
+   - 状态标签管理
+   - 可展开/收起的工具栏
+   - 用户信息显示
+
+## 4. WebSocket适配计划
+
+### 4.1 已实现功能
+1. WebSocket服务器
+   - 基本通信架构
+   - 用户认证
+   - 配对逻辑
+   - 状态更新机制
+
+2. 客户端WebSocket服务
+   - 连接管理（connect/disconnect）
+   - 状态更新
+   - 事件处理系统
+   - 自动重连机制
+
+### 4.2 测试计划
+
+#### 4.2.1 基础连接测试
+- 启动服务器（端口3001）
+- 使用两个浏览器进行测试
+- 验证登录和WebSocket连接
+- 测试断开连接和重连
+
+#### 4.2.2 配对功能测试
+- 使用两个账号进行配对
+- 验证配对状态实时更新
+- 测试配对过程中的状态同步
+
+#### 4.2.3 状态同步测试
+- 测试在线/离线状态更新
+- 测试活动状态同步（打开新标签等）
+- 测试自定义状态标签
+- 验证状态更新的实时性
+
+#### 4.2.4 异常情况测试
+- 网络断开重连
+- 服务器宕机恢复
+- 无效token处理
+
+## 5. 建议阅读顺序
+1. 先看 `manifest.json` 了解扩展的基本配置
+2. 查看 `popup.html` 和 `popup.js` 理解用户界面
+3. 研究服务端的 `server.js` 和核心服务文件
+4. 最后了解 `background.js` 和其他辅助服务
+
+注：其他文件如 `package.json`、`tailwind.config.js`、`.gitignore` 等都是辅助性的配置文件，对理解项目核心功能不是特别重要。 

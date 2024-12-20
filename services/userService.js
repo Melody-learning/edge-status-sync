@@ -43,11 +43,11 @@ class UserService {
             users: {
                 [userId]: {
                     token: hashedToken,
-                    text: text, // 保存口令的文字部分
-                    number: number, // 保存口令的数字部分
+                    text,
+                    number,
                     createdAt: timestamp,
                     partnerId: null,
-                    pairStatus: 'unpaired' // unpaired, waiting, paired
+                    pairStatus: 'unpaired'
                 }
             },
             tokens: {
@@ -97,7 +97,7 @@ class UserService {
         };
     }
 
-    // 发起配对请求
+    // ���起配对请求
     async initiatePairing(userId, partnerToken) {
         const data = await this.storage.get(['users', 'tokens', 'currentUser']);
         const hashedPartnerToken = await hashToken(partnerToken);

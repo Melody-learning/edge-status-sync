@@ -1,6 +1,7 @@
 // 导入用户服务
 import { userService } from '../services/userService.js';
 import { activityService } from '../services/activityService.js';
+import { socketService } from '../services/socketService.js';
 
 // 页面元素
 const pages = {
@@ -223,8 +224,12 @@ function clearInputs(textInput, numberInput, textError, numberError) {
 // 处理退出登录
 async function handleLogout() {
     try {
+        // 断开 WebSocket 连接
+        socketService.disconnect();
+        
         // 清除存储的用户信息
         await chrome.storage.local.remove('currentUser');
+        
         // 清空所有输入框
         clearInputs(
             document.getElementById('loginText'),
@@ -232,12 +237,7 @@ async function handleLogout() {
             document.getElementById('loginTextError'),
             document.getElementById('loginNumberError')
         );
-        clearInputs(
-            document.getElementById('partnerText'),
-            document.getElementById('partnerNumber'),
-            document.getElementById('partnerTextError'),
-            document.getElementById('partnerNumberError')
-        );
+        
         // 跳转到登录页面
         showPage('login');
     } catch (error) {
@@ -274,12 +274,15 @@ async function handlePairing(partnerText, partnerNumber) {
                 document.getElementById('partnerNumberError')
             );
             
-            // 更新用户数据并跳转到主页
+            // 新用户数据并跳转到主页
             console.log('配对成功，跳转到主页');
-            navigateByPairStatus({
+            await navigateByPairStatus({
                 ...currentUser,
                 partnerId: pairResult.partnerId
             });
+
+            // 更新用户昵称显示
+            await updateUserNicknames();
         }
     } catch (error) {
         console.error('连接操作失败:', error);
@@ -390,7 +393,7 @@ async function updateActivityList() {
     }
 }
 
-// 更新用户状态显示
+// 更新户状态显示
 function updateUserStatus(userId, isOnline) {
     chrome.storage.local.get('currentUser', (result) => {
         const currentUser = result.currentUser;
@@ -542,7 +545,7 @@ class StatusTagManager {
         // 创建输入框
         const input = document.createElement('input');
         input.className = 'status-tag-input';
-        input.maxLength = 12; // 限制最大字符数
+        input.maxLength = 12; // 限制最大字符
         input.placeholder = '输入状态...';
 
         // 添加到容器
@@ -551,7 +554,7 @@ class StatusTagManager {
         // 插入到添加按钮之前
         this.addTagButton.parentNode.insertBefore(tagContainer, this.addTagButton);
 
-        // 聚焦输入框
+        // 聚焦输���框
         input.focus();
 
         // 添加事件监听
@@ -581,7 +584,7 @@ class StatusTagManager {
             });
             tagContainer.appendChild(deleteBtn);
         } else {
-            // 如果没有输入内容，移除标签
+            // 如果没有输入内容，删除标签
             tagContainer.remove();
         }
     }
@@ -746,44 +749,53 @@ class ToolbarManager {
 // 初始化主页面
 async function initMainPage() {
     try {
-        console.log('初始化主页面...');
-        // 设置当前日期
-        const currentDate = document.getElementById('currentDate');
-        if (currentDate) {
-            currentDate.textContent = formatDate();
+        // 获取当前用户信息
+        const { currentUser } = await chrome.storage.local.get('currentUser');
+        if (!currentUser || !currentUser.token) {
+            throw new Error('No user token found');
         }
 
-        // 更新用户昵称
+        // 更新用户昵称显示
         await updateUserNicknames();
 
-        // 初始化时隐藏所有音乐图标
-        document.querySelectorAll('.music-icon').forEach(icon => {
-            icon.style.display = 'none';
-        });
-
-        // 初始化标签管理器
+        // 初始化状态标签管理器
         const tagManager = new StatusTagManager();
         await tagManager.loadTags();
 
-        // 初始化工具栏
-        const toolbarManager = new ToolbarManager();
+        // 初始化工具栏管理器
+        new ToolbarManager();
 
-        // 获取当前用户信息
-        const storage = await chrome.storage.local.get('currentUser');
-        const currentUser = storage.currentUser;
+        // 连接 WebSocket
+        await socketService.connect(currentUser.token);
 
-        // 初始化活动显示
-        await updateLatestActivities();
+        // 监听伙伴状态变化
+        socketService.on('partner:online', () => {
+            updatePairStatus(true);
+            // 可以添加在线提示
+        });
 
-        // 监听活动更新
-        chrome.runtime.onMessage.addListener((message) => {
-            if (message.type === 'ACTIVITY_UPDATE') {
-                handleActivityUpdate(message.activity);
+        socketService.on('partner:offline', () => {
+            updatePairStatus(false);
+            // 可以添加离线提示
+        });
+
+        socketService.on('partner:status', (data) => {
+            // 更新伙伴状态显示
+            const partnerStatus = document.getElementById('partnerStatus');
+            if (partnerStatus) {
+                partnerStatus.textContent = data.status;
             }
+        });
+
+        // 监听连接错误
+        socketService.on('error', (error) => {
+            console.error('WebSocket error:', error);
+            // 可以添加错误提示
         });
 
     } catch (error) {
         console.error('初始化主页面失败:', error);
+        showPage('login');
     }
 }
 
@@ -978,7 +990,7 @@ async function getLocationAndWeather() {
             // 显示城市名称
             document.getElementById('locationText').textContent = locationData.city;
             
-            // 使用 wttr.in 获取天气信息（完全免费，无需密钥）
+            // 用 wttr.in 获取天气信息（完全免费，无需密钥）
             const weatherResponse = await fetch(
                 `https://wttr.in/${locationData.city}?format=j1&lang=zh`
             );
@@ -1089,11 +1101,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // 保存当前用户信息
                 await chrome.storage.local.set({
                     currentUser: {
+                        ...userData,
                         userId,
                         token,
                         text,
-                        number,
-                        ...userData
+                        number
                     }
                 });
 
